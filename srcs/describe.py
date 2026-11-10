@@ -1,5 +1,15 @@
 import sys
 
+def parser(filename):
+    with open(filename, 'r', encoding='utf-8') as f:
+        keys = f.readline().rstrip().split(',')
+        d = {key: [] for key in keys}
+        for line in f:
+            values = line.rstrip().split(',')
+            for key, value in zip(keys, values):
+                d[key].append(value)
+    return d
+
 
 def std(arr):
     n = len(arr)
@@ -20,15 +30,6 @@ def percentile(arr, p):
         return s[bas] + reste * (s[bas + 1] - s[bas])
     return s[bas]
 
-def parser(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        keys = f.readline().rstrip().split(',')
-        d = {key: [] for key in keys}
-        for line in f:
-            values = line.rstrip().split(',')
-            for key, value in zip(keys, values):
-                d[key].append(value)
-    return d
 
 def is_number(s):
     try:
