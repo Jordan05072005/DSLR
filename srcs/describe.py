@@ -38,6 +38,9 @@ def is_number(s):
     except ValueError:
         return False
 
+def to_float(values):
+    return [float(v) for v in values if v != '' and is_number(v)]
+
 def describe(d):
     fun=[
          {"name": "Count", "func": lambda arr: len(arr)},
@@ -51,7 +54,7 @@ def describe(d):
     ]
     numeric = {}
     for key, values in d.items():
-        floats = [float(v) for v in values if v != '' and is_number(v)]
+        floats = to_float(values)
         if len(floats) > 0 and len(floats) == len([v for v in values if v != '']):
             numeric[key] = floats
 

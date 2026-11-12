@@ -1,36 +1,37 @@
 import matplotlib.pyplot as plt
 import sys
+from describe import std, parser, to_float
 
-def parser(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        keys = f.readline().rstrip().split(',')
-        d = {key: [] for key in keys}
-        for line in f:
-            values = line.rstrip().split(',')
-            for key, value in zip(keys, values):
-                d[key].append(value)
-        return d
+# Feature selection :
+# Séléction des variable inutile, qui ont un impact homogène sur tout les maisons et donc
+# n'apporte pas d'information sur la maison de l'élève. On ne garde que les variables qui ont un impact différent selon la maison.
 
-def histogram(filename):
-    d = parser(filename)
-    matieres = ["Arithmancy", "Astronomy", "Charms",
+
+COURSES = ["Arithmancy", "Astronomy", "Charms",
                 "Defense Against the Dark Arts", "Divination", "Herbology",
-                "History of Magic", "Potions", "Transfiguration", "Care of Magical Creatures", "Charms", "Flying"]
+                "History of Magic", "Potions", "Transfiguration", "Care of Magical Creatures", "Flying"]
 
-    user = list(range(len(d["Astronomy"])))
-    cols = 4
-    rows = (len(matieres) + cols - 1) // cols
-    fig, axes = plt.subplots(rows, cols, figsize=(4 * cols, 3 * rows))
-    axes = axes.flatten()
-    for i, cours in enumerate(matieres):
-        for maison in ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']:
-            notes = [float(v) for v, m in zip(d[cours], d['Hogwarts House'])
-                     if m == maison and v != '']
-            axes[i].hist(notes, bins=20, alpha=0.5, label=maison)
-            axes[i].set_title(cours, fontsize=9)
+def histogram(d, course):
+    for maison in ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']:
+        notes = [float(v) for v, m in zip(d[course], d['Hogwarts House'])
+                 if m == maison and v != '']
+        plt.hist(notes, bins=20, alpha=0.5, label=maison)
+    plt.suptitle(course, fontsize=9)
     plt.tight_layout()
-    plt.savefig('histogram.png')
+    plt.savefig('./../img/histogram.png')
     plt.show()
+
+
+def find_course_homogene(filename):
+    d = parser(filename)
+    homogeneCourse = None
+    for course in COURSES:
+        val = std(to_float(d[course]))
+        if (not homogeneCourse or val < homogeneCourse["std"]):
+            homogeneCourse = {"course": course, "std": val}
+    histogram(d, homogeneCourse["course"])
+    return homogeneCourse
+
 
 
 if __name__ == '__main__':
@@ -38,4 +39,4 @@ if __name__ == '__main__':
         print("Usage: python describe.py <filename>")
         sys.exit(1)
     filename = sys.argv[1]
-    histogram(filename)
+    find_course_homogene(filename)
