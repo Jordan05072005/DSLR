@@ -11,24 +11,42 @@ COURSES = ["Arithmancy", "Astronomy", "Charms",
                 "Defense Against the Dark Arts", "Divination", "Herbology",
                 "History of Magic", "Potions", "Transfiguration", "Care of Magical Creatures", "Flying"]
 
+HOUSES = ["Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"]
+
+
 def histogram(d, course):
-    for maison in ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']:
-        notes = [float(v) for v, m in zip(d[course], d['Hogwarts House'])
-                 if m == maison and v != '']
-        plt.hist(notes, bins=20, alpha=0.5, label=maison)
+    for house in ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']:
+        notes = [v for v, m in zip(d[course], d['Hogwarts House'])
+                 if m == house and v is not None]
+        plt.hist(notes, bins=20, alpha=0.5, label=house )
     plt.suptitle(course, fontsize=9)
     plt.tight_layout()
     plt.savefig('./../img/histogram.png')
-    plt.show()
+    # plt.show()
+
+def fisherScore(d, course):
+    notes = [v for v in d[course] if v is not None]
+    meanAll = sum(notes) / len(notes)
+
+    num, den = 0.0, 0.0
+    for house in HOUSES:
+        notes_house = [v for v, h in zip(d[course], d["Hogwarts House"])
+                       if h == house and v is not None]
+        n_c = len(notes_house)
+        meanHouse = sum(notes_house) / n_c
+        stdHouse = std(notes_house)
+        num += n_c * (meanHouse - meanAll) ** 2
+        den += n_c * stdHouse ** 2
+    return num / den
 
 
 def find_course_homogene(filename):
     d = parser(filename)
     homogeneCourse = None
     for course in COURSES:
-        val = std(to_float(d[course]))
-        if (not homogeneCourse or val < homogeneCourse["std"]):
-            homogeneCourse = {"course": course, "std": val}
+        val = fisherScore(d, course)
+        if (not homogeneCourse or val < homogeneCourse["fisherScore"]):
+            homogeneCourse = {"course": course, "fisherScore": val}
     histogram(d, homogeneCourse["course"])
     return homogeneCourse
 

@@ -15,9 +15,9 @@ def abs(nbr):
 def paired(col_a, col_b):
     xs, ys = [], []
     for va, vb in zip(col_a, col_b):
-        if va != '' and vb != '':
-            xs.append(float(va))
-            ys.append(float(vb))
+        if va is not None and vb is not None:
+            xs.append(va)
+            ys.append(vb)
     return xs, ys
 
 def coefPearson(ax, ay):

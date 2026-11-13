@@ -1,5 +1,14 @@
 import sys
 
+def convert(value):
+    if value == '':
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return value          # texte : on le garde tel quel
+
+
 def parser(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         keys = f.readline().rstrip().split(',')
@@ -7,9 +16,8 @@ def parser(filename):
         for line in f:
             values = line.rstrip().split(',')
             for key, value in zip(keys, values):
-                d[key].append(value)
+                d[key].append(convert(value))
     return d
-
 
 def std(arr):
     n = len(arr)
@@ -30,16 +38,8 @@ def percentile(arr, p):
         return s[bas] + reste * (s[bas + 1] - s[bas])
     return s[bas]
 
-
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
 def to_float(values):
-    return [float(v) for v in values if v != '' and is_number(v)]
+    return [v for v in values if isinstance(v, float)]
 
 def describe(d):
     fun=[
